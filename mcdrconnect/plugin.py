@@ -11,7 +11,6 @@ from mcdreforged.command.command_manager import CommandManager, TraversePurpose
 
 from mcdrconnect.config import Config
 
-config: Optional[Config] = None
 cached_version: Optional['ServerVersion'] = None
 suggest_command_backup: Optional[MethodType] = None
 
@@ -22,7 +21,7 @@ class ServerVersion(Serializable):
 
 
 def query_data(server: ServerInterface, id_: str, data: str = "") -> Optional[str]:
-    return server.rcon_query(f'mcdrconnectgetdata {id_} "{data}"')
+    return server.rcon_query('mcdrconnectgetdata {} "{}"'.format(id_, data.replace('"', '\\"')))
 
 
 def get_server_command_completion(server: ServerInterface, input_: str, cursor: int) -> Optional[CommandSuggestions]:
@@ -58,18 +57,18 @@ def suggest_command(self: CommandManager, command: str, source: CommandSource) -
 
 
 def on_load(server: PluginServerInterface, old):
-    global config, cached_version, suggest_command_backup
+    global cached_version, suggest_command_backup
     config = server.load_config_simple(target_class=Config)
-    if old.cached_version is not None:
+    if getattr(old, 'cached_version', None) is not None:
         cached_version = old.cached_version
     if config.advanced_completion:
+        server.logger.info("Patching CommandManager")
         command_manager = server._mcdr_server.command_manager
         suggest_command_backup = command_manager.suggest_command
         command_manager.suggest_command = MethodType(suggest_command, command_manager)
 
 
 def on_unload(server: PluginServerInterface):
-    if config.advanced_completion:
-        command_manager = server._mcdr_server.command_manager
-        if suggest_command_backup is not None:
-            command_manager.suggest_command = suggest_command_backup
+    if suggest_command_backup is not None:
+        server.logger.info("Unpatching CommandManager")
+        server._mcdr_server.command_manager.suggest_command = suggest_command_backup

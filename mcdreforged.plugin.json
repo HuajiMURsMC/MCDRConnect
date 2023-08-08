@@ -5,5 +5,9 @@
     "description": "Querying data from your server with RCON",
     "author": [
         "Huaji_MUR233"
+    ],
+    "entrypoint": "mcdrconnect.plugin",
+    "resources": [
+        "LICENSE"
     ]
 }
