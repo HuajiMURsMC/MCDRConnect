@@ -1,0 +1,9 @@
+{
+    "id": "mcdrconnect",
+    "version": "1.0.0",
+    "name": "MCDRConnect",
+    "description": "Querying data from your server with RCON",
+    "author": [
+        "Huaji_MUR233"
+    ]
+}
